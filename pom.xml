@@ -41,19 +41,35 @@
 
         <cobertura.version>2.7</cobertura.version>
 		
+		<junit.version>4.12</junit.version>
+        <selenium.version>2.47.1</selenium.version>
+        <selenium-android.version>2.39.0</selenium-android.version>
+        <htmlunit.version>2.18</htmlunit.version>
+        <pitest.version>1.1.5</pitest.version>
+        <gatling.version>2.1.7</gatling.version>
+		
 		<!-- Cargo settings -->
-		<tomcat.version>7.0.55</tomcat.version>
+		<tomcat.version>7.0.61</tomcat.version>
 		<tomcat.downloadUrl>http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip</tomcat.downloadUrl>
 		
 		<!-- code coverage -->
 		<jacoco.version>0.7.1.201405082137</jacoco.version>
-		<jacoco-listeners.version>2.4</jacoco-listeners.version>
+		<jacoco-listeners.version>3.5</jacoco-listeners.version>
 		<jacoco.path>${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar</jacoco.path>
 		<jacoco.utReport>${project.build.directory}/jacoco.exec</jacoco.utReport>
 		<jacoco.utAgentConfig>-javaagent:${jacoco.path}=destfile=${jacoco.utReport}</jacoco.utAgentConfig>
 		<jacoco.itReport>${project.build.directory}/jacoco-it.exec</jacoco.itReport>
 		<jacoco.itAgentConfig>-javaagent:${jacoco.path}=destfile=${jacoco.itReport}</jacoco.itAgentConfig>
 		
+		<jboss.version>7.1.1.Final</jboss.version>
+        <jboss.downloadUrl>http://download.jboss.org/jbossas/7.1/jboss-as-${jboss.version}/jboss-as-${jboss.version}.zip</jboss.downloadUrl>
+ 
+        <jetty.version>8.1.3.v20120416</jetty.version>
+        <jetty.downloadUrl>http://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/${jetty.version}/jetty-distribution-${jetty.version}.zip</jetty.downloadUrl>
+		
+		<!-- overriding sonar.sources properties to enable multi-language analysis -->
+        <sonar.sources>src/main</sonar.sources>
+        <org.sonar.plugins.jmeter.jtlpath>${project.build.directory}/jmeter/results/petclinic.jtl</org.sonar.plugins.jmeter.jtlpath>
     </properties>
 
     <dependencyManagement>
@@ -333,10 +349,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.13</version>
 				<configuration>
-					<!-- JDK 7: relax byte code verifier to prevent double -->
-					<!-- instrumentation issues with OpenJPA tests and JaCoCo -->
-					<!-- and inject JaCoCo agent for code coverage -->
-					<argLine>-XX:-UseSplitVerifier ${jacoco.utAgentConfig}</argLine>
+					<!-- JDK 7 - relax bytecode verifier to prevent double -->
+                    <!-- instrumentation issues with OpenJPA tests and JaCoCo -->
+                    <!-- <argLine>-XX:-UseSplitVerifier ${jacoco.utAgentConfig}</argLine> -->
+                    <!-- JDK 8 - bytecode verifier cannot be relaxed or disabled -->
+                    <!-- to prevent runtime errors, OpenJPA tests are ignored -->
+                    <argLine>${jacoco.utAgentConfig}</argLine>
                     <includes>
                         <include>**/*Tests.java</include>
 						<include>**/*Test.java</include>
@@ -345,6 +363,8 @@
 						<exclude>**/it/*IT.java</exclude>
 					</excludes>
 					<properties>
+					    <!-- add SonarQube's JaCoCo listener to enable -->
+                        <!-- gathering of code coverage metrics per test -->
 						<property>
 							<name>listener</name>
 							<value>org.sonar.java.jacoco.JUnitListener</value>
@@ -550,7 +570,7 @@
 						</configuration>
 						<executions>
 							<execution>
-								<id>integration-test</id>
+								<id>run-selenium-tests</id>
 								<phase>integration-test</phase>
 								<goals>
 									<goal>integration-test</goal>
@@ -574,7 +594,7 @@
 				</configuration>
 				<executions>
 				  <execution>
-					<id>integration-test</id>
+					<id>run-jmeter-test</id>
 					<phase>integration-test</phase>
 					<goals>
 					  <goal>jmeter</goal>
@@ -654,7 +674,37 @@
 			</plugins>
 		  </build>
 		</profile>
-
+		<!-- add Gatling integration tests -->
+        <profile>
+            <id>gatling-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.gatling</groupId>
+                        <artifactId>gatling-maven-plugin</artifactId>
+                        <version>${gatling.version}</version>
+                        <configuration>
+                            <simulationClass>Petclinic</simulationClass>
+                            <simulationsFolder>src/test/gatling/</simulationsFolder>
+                            <!--configFolder>src/test/gatling/</configFolder>
+                            <configFile>gatling.conf</configFile-->
+                            <jvmArgs>
+                                <jvmArg>-Dgatling.data.writers=file</jvmArg>
+                            </jvmArgs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>run-gatling-tests</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
    </profiles>
 
     <url>demopetclinic</url>
