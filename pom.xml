@@ -454,6 +454,45 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>cargo-tomcat</id>
+			<build>
+				<plugins>
+				  <plugin>
+					<groupId>org.codehaus.cargo</groupId>
+					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>1.2.1</version>
+					<configuration>
+					  <container>
+						<containerId>tomcat7x</containerId>
+						<zipUrlInstaller><url>${tomcat.downloadUrl}</url></zipUrlInstaller>
+					  </container>
+					  <configuration>
+						<properties>
+						  <cargo.servlet.port>58080</cargo.servlet.port>
+						  <cargo.tomcat.ajp.port>58009</cargo.tomcat.ajp.port>
+						  <cargo.jvmargs>${jacoco.itAgentConfig}</cargo.jvmargs>
+						</properties>
+					  </configuration>
+					</configuration>
+					<executions>
+					  <!-- start server before integration tests -->
+					  <execution>
+						<id>start-container</id>
+						<phase>pre-integration-test</phase>
+						<goals><goal>start</goal></goals>
+					  </execution>
+					  <!-- stop server after integration tests -->
+					  <execution>
+						<id>stop-container</id>
+						<phase>post-integration-test</phase>
+						<goals><goal>stop</goal></goals>
+					  </execution>
+					</executions>
+				  </plugin>
+				</plugins>
+			</build>
+		</profile>
    </profiles>
 
     <url>demopetclinic</url>
