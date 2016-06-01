@@ -41,9 +41,11 @@
 
         <cobertura.version>2.7</cobertura.version>
 		
+		<!-- Cargo settings -->
 		<tomcat.version>7.0.55</tomcat.version>
 		<tomcat.downloadUrl>http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip</tomcat.downloadUrl>
 		
+		<!-- code coverage -->
 		<jacoco.version>0.7.1.201405082137</jacoco.version>
 		<jacoco-listeners.version>2.4</jacoco-listeners.version>
 		<jacoco.path>${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar</jacoco.path>
@@ -51,6 +53,7 @@
 		<jacoco.utAgentConfig>-javaagent:${jacoco.path}=destfile=${jacoco.utReport}</jacoco.utAgentConfig>
 		<jacoco.itReport>${project.build.directory}/jacoco-it.exec</jacoco.itReport>
 		<jacoco.itAgentConfig>-javaagent:${jacoco.path}=destfile=${jacoco.itReport}</jacoco.itAgentConfig>
+		
     </properties>
 
     <dependencyManagement>
