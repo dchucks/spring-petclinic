@@ -40,7 +40,17 @@
         <dandelion.datatables.version>1.1.0</dandelion.datatables.version>
 
         <cobertura.version>2.7</cobertura.version>
-
+		
+		<tomcat.version>7.0.55</tomcat.version>
+		<tomcat.downloadUrl>http://archive.apache.org/dist/tomcat/tomcat-7/v${tomcat.version}/bin/apache-tomcat-${tomcat.version}.zip</tomcat.downloadUrl>
+		
+		<jacoco.version>0.7.1.201405082137</jacoco.version>
+		<jacoco-listeners.version>2.4</jacoco-listeners.version>
+		<jacoco.path>${settings.localRepository}/org/jacoco/org.jacoco.agent/${jacoco.version}/org.jacoco.agent-${jacoco.version}-runtime.jar</jacoco.path>
+		<jacoco.utReport>${project.build.directory}/jacoco.exec</jacoco.utReport>
+		<jacoco.utAgentConfig>-javaagent:${jacoco.path}=destfile=${jacoco.utReport}</jacoco.utAgentConfig>
+		<jacoco.itReport>${project.build.directory}/jacoco-it.exec</jacoco.itReport>
+		<jacoco.itAgentConfig>-javaagent:${jacoco.path}=destfile=${jacoco.itReport}</jacoco.utAgentConfig>
     </properties>
 
     <dependencyManagement>
@@ -271,6 +281,21 @@
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
+		
+		<dependency>
+			<groupId>org.jacoco</groupId>
+			<artifactId>org.jacoco.agent</artifactId>
+			<version>${jacoco.version}</version>
+			<classifier>runtime</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.sonar-plugins.java</groupId>
+			<artifactId>sonar-jacoco-listeners</artifactId>
+			<version>${jacoco-listeners.version}</version>
+			<scope>test</scope>
+		</dependency>
+
     </dependencies>
 
     <!-- Maven plugin versions are mentioned in order to guarantee the build reproducibility in the long term -->
@@ -304,10 +329,23 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.13</version>
-                <configuration>
+				<configuration>
+					<!-- JDK 7: relax byte code verifier to prevent double -->
+					<!-- instrumentation issues with OpenJPA tests and JaCoCo -->
+					<!-- and inject JaCoCo agent for code coverage -->
+					<argLine>-XX:-UseSplitVerifier ${jacoco.utAgentConfig}</argLine>
                     <includes>
                         <include>**/*Tests.java</include>
                     </includes>
+					<excludes>
+						<exclude>**/it/*IT.java</exclude>
+					</excludes>
+					<properties>
+						<property>
+							<name>listener</name>
+							<value>org.sonar.java.jacoco.JUnitListener</value>
+						</property>
+					</properties>
                 </configuration>
             </plugin>
             <plugin>
