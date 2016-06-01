@@ -5,7 +5,7 @@
 
 ## Running petclinic locally
 ```
-	git clone https://github.com/spring-projects/spring-petclinic.git
+	git clone https://github.com/dchucks/spring-petclinic.git
 	cd spring-petclinic
 	./mvnw tomcat7:run
 ```
@@ -44,7 +44,7 @@ If m2e is not there, just follow the install process here: http://eclipse.org/m2
 
 1) In the command line
 ```
-git clone https://github.com/spring-projects/spring-petclinic.git
+git clone https://github.com/dchucks/spring-petclinic.git
 ```
 2) Inside Eclipse
 ```
